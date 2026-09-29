@@ -1,14 +1,277 @@
 <!DOCTYPE html>
 <html>
 <head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
     <title>Barcode Inventory System</title>
+
+    <script src="https://unpkg.com/html5-qrcode"></script>
+
+    <style>
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #f2f2f2;
+            margin: 0;
+            padding: 20px;
+            text-align: center;
+        }
+
+        h1 {
+            margin-bottom: 5px;
+        }
+
+        .subtitle {
+            color: #555;
+            margin-bottom: 20px;
+        }
+
+        #reader {
+            width: 100%;
+            max-width: 450px;
+            margin: auto;
+            background: white;
+            padding: 10px;
+            border-radius: 12px;
+        }
+
+        #result {
+            max-width: 450px;
+            margin: 20px auto;
+            padding: 20px;
+            background: white;
+            border-radius: 12px;
+            text-align: left;
+            display: none;
+        }
+
+        .product-name {
+            text-align: center;
+            font-size: 25px;
+            margin-bottom: 15px;
+        }
+
+        .detail {
+            margin: 8px 0;
+        }
+
+        .available {
+            color: green;
+            font-weight: bold;
+        }
+
+        .low-stock {
+            color: red;
+            font-weight: bold;
+        }
+
+        .barcode {
+            color: #555;
+            font-size: 14px;
+        }
+
+    </style>
+
 </head>
 
 <body>
 
-    <h1>Barcode Inventory System</h1>
+    <h1>📦 Barcode Inventory System</h1>
 
-    <p>My barcode inventory project is working!</p>
+    <p class="subtitle">
+        Scan a product barcode to view inventory details
+    </p>
+
+    <div id="reader"></div>
+
+    <div id="result"></div>
+
+
+    <script>
+
+        const products = {
+
+            "890100100001": {
+                name: "Biscuits",
+                category: "Food",
+                price: 30,
+                stock: 45,
+                reorder: 10
+            },
+
+            "890100100002": {
+                name: "Milk",
+                category: "Dairy",
+                price: 32,
+                stock: 18,
+                reorder: 10
+            },
+
+            "890100100003": {
+                name: "Shampoo",
+                category: "Personal Care",
+                price: 120,
+                stock: 7,
+                reorder: 10
+            },
+
+            "890100100004": {
+                name: "Notebook",
+                category: "Stationery",
+                price: 60,
+                stock: 25,
+                reorder: 8
+            },
+
+            "890100100005": {
+                name: "Juice",
+                category: "Beverage",
+                price: 50,
+                stock: 6,
+                reorder: 10
+            }
+
+        };
+
+
+        function showProduct(barcode) {
+
+            const result = document.getElementById("result");
+
+            result.style.display = "block";
+
+            const product = products[barcode];
+
+
+            if (product) {
+
+                let status;
+
+                if (product.stock <= product.reorder) {
+
+                    status =
+                    `<span class="low-stock">
+                    ⚠ LOW STOCK - REORDER REQUIRED
+                    </span>`;
+
+                } else {
+
+                    status =
+                    `<span class="available">
+                    ✓ STOCK AVAILABLE
+                    </span>`;
+
+                }
+
+
+                result.innerHTML = `
+
+                    <div class="product-name">
+                        ${product.name}
+                    </div>
+
+                    <div class="detail barcode">
+                        <b>Barcode:</b> ${barcode}
+                    </div>
+
+                    <div class="detail">
+                        <b>Category:</b> ${product.category}
+                    </div>
+
+                    <div class="detail">
+                        <b>Price:</b> ₹${product.price}
+                    </div>
+
+                    <div class="detail">
+                        <b>Available Stock:</b> ${product.stock}
+                    </div>
+
+                    <div class="detail">
+                        <b>Reorder Level:</b> ${product.reorder}
+                    </div>
+
+                    <div class="detail">
+                        <b>Status:</b> ${status}
+                    </div>
+
+                `;
+
+            } else {
+
+                result.innerHTML = `
+
+                    <h2>❌ Product Not Found</h2>
+
+                    <p>
+                        Barcode:
+                        <b>${barcode}</b>
+                    </p>
+
+                    <p>
+                        This product is not present
+                        in the inventory.
+                    </p>
+
+                `;
+
+            }
+
+        }
+
+
+        function onScanSuccess(decodedText) {
+
+            showProduct(decodedText);
+
+        }
+
+
+        function onScanFailure(error) {
+
+            // Scanner continues searching.
+
+        }
+
+
+        const scanner = new Html5QrcodeScanner(
+
+            "reader",
+
+            {
+                fps: 10,
+
+                qrbox: {
+                    width: 300,
+                    height: 150
+                },
+
+                formatsToSupport: [
+
+                    Html5QrcodeSupportedFormats.CODE_128,
+
+                    Html5QrcodeSupportedFormats.EAN_13,
+
+                    Html5QrcodeSupportedFormats.EAN_8
+
+                ]
+
+            },
+
+            false
+
+        );
+
+
+        scanner.render(
+            onScanSuccess,
+            onScanFailure
+        );
+
+    </script>
 
 </body>
 </html>
